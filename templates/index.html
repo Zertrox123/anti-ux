@@ -1,11 +1,115 @@
 <!DOCTYPE html>
-  <html lang="fr">
-    <head>
-      <title>Anti UX</title>
-        <link rel="stylesheet" type="text/css" href="static/style.css">
-      <base href="https://www.exemple.com" />
-    </head>
-    <body>
-        <h1>Welcome on your page, dumbass </h1>
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoDash</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <div id="auth-container" class="auth-container">
+        <!-- LOGIN CARD -->
+        <div id="login-card" class="auth-card">
+            <h2>Welcome Back</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+            <div class="auth-footer">
+                Don't have an account? <span onclick="toggleAuth()">Register</span>
+            </div>
+        </div>
+
+        <!-- REGISTER CARD (Hidden by default) -->
+        <div id="register-card" class="auth-card hidden">
+            <h2>Create Account</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
+            <div class="auth-footer">
+                Already have an account? <span onclick="toggleAuth()">Login</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD (Hidden by default) -->
+    <div id="dashboard-container" class="dashboard-wrapper hidden">
+        <aside>
+            <div class="logo"><i data-lucide="layout-dashboard"></i> CryptoDash</div>
+            <nav>
+                <ul>
+                    <li class="active"><i data-lucide="pie-chart"></i> Overview</li>
+                    <li><i data-lucide="wallet"></i> Wallet</li>
+                    <li><i data-lucide="arrow-up-right"></i> Transactions</li>
+                    <li><i data-lucide="settings"></i> Settings</li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main>
+            <header>
+                <div class="search-bar">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="crypto-search" placeholder="Search coins..." onkeyup="filterTable()">
+                </div>
+                <div class="user-profile">
+                    <span>John Doe</span>
+                    <button onclick="logout()" class="btn-logout">Logout</button>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Balance</h3>
+                    <div class="value">$42,500.00</div>
+                    <div class="trend up">+12.5% ↑</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Profit/Loss</h3>
+                    <div class="value">$5,230.00</div>
+                    <div class="trend up">+4.2% ↑</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h2>Market Overview</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Price</th>
+                            <th>24h Change</th>
+                            <th>Market Cap</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
 </html>
