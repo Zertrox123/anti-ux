@@ -1,5 +1,3 @@
-/* Données partagées CryptoDash */
-
 window.CryptoData = {
     market: [
         { name: 'Bitcoin', symbol: 'BTC', price: 64230.00, change: 2.5, cap: '$1.2T', color: '#f7931a' },

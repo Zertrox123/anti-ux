@@ -1,17 +1,22 @@
-/* Mini ping-pong pendant le chargement — fond blanc, barres & balle noires */
-
 window.LoaderPong = (function () {
     'use strict';
 
-    function start(canvas, container) {
+    function start(canvas, container, opts) {
         if (!canvas) return function () {};
+
+        opts = opts || {};
+        const loadCount = Math.max(1, opts.loadCount || 1);
+        const speedMul = Math.min(4, 1 + (loadCount - 1) * 0.32);
 
         const ctx = canvas.getContext('2d');
         const PADDLE_W = 16;
         const PADDLE_H = 100;
         const BALL_R = 9;
         const MARGIN = 28;
-        const AI_SPEED = 4.2;
+        const AI_SPEED = 4.8 * speedMul;
+        const BASE_VX = 7.5 * speedMul;
+        const BASE_VY = 5.2 * speedMul;
+        const MAX_VY = 11 * speedMul;
 
         let w = 0;
         let h = 0;
@@ -35,18 +40,19 @@ window.LoaderPong = (function () {
                 rightY = h / 2 - PADDLE_H / 2;
                 ballX = w / 2;
                 ballY = h / 2;
-                vx = 5 * (Math.random() < 0.5 ? 1 : -1);
-                vy = 3.5 * (Math.random() < 0.5 ? 1 : -1);
+                vx = BASE_VX * (Math.random() < 0.5 ? 1 : -1);
+                vy = BASE_VY * (Math.random() < 0.5 ? 1 : -1);
             }
         }
 
         function onMove(e) {
             const rect = canvas.getBoundingClientRect();
+            if (!rect.height) return;
             mouseY = e.clientY - rect.top;
         }
 
         function onTouch(e) {
-            if (e.touches[0]) onMove(e.touches[0]);
+            if (e.touches && e.touches[0]) onMove(e.touches[0]);
         }
 
         function clamp(v, min, max) {
@@ -91,11 +97,11 @@ window.LoaderPong = (function () {
             if (ballX < -30 || ballX > w + 30) {
                 ballX = w / 2;
                 ballY = h / 2;
-                vx = 5 * (Math.random() < 0.5 ? 1 : -1);
-                vy = 3.5 * (Math.random() < 0.5 ? 1 : -1);
+                vx = BASE_VX * (Math.random() < 0.5 ? 1 : -1);
+                vy = BASE_VY * (Math.random() < 0.5 ? 1 : -1);
             }
 
-            vy = clamp(vy, -9, 9);
+            vy = clamp(vy, -MAX_VY, MAX_VY);
         }
 
         function draw() {
@@ -129,16 +135,18 @@ window.LoaderPong = (function () {
 
         resize();
         window.addEventListener('resize', resize);
-        container.addEventListener('mousemove', onMove);
-        container.addEventListener('touchmove', onTouch, { passive: true });
+        window.addEventListener('mousemove', onMove, { passive: true });
+        window.addEventListener('touchmove', onTouch, { passive: true });
+        window.addEventListener('touchstart', onTouch, { passive: true });
         loop();
 
         return function stop() {
             running = false;
             cancelAnimationFrame(animId);
             window.removeEventListener('resize', resize);
-            container.removeEventListener('mousemove', onMove);
-            container.removeEventListener('touchmove', onTouch);
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('touchmove', onTouch);
+            window.removeEventListener('touchstart', onTouch);
         };
     }
 

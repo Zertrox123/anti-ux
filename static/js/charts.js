@@ -1,5 +1,3 @@
-/* Helpers Chart.js */
-
 window.CryptoCharts = {
     defaults: function () {
         if (typeof Chart === 'undefined') return;

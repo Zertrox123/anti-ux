@@ -1,5 +1,3 @@
-/* Logique d'inscription / connexion anti-UX */
-
 (function () {
     'use strict';
 
@@ -128,7 +126,6 @@
 
         document.body.appendChild(overlay);
 
-        /* Logique inversée : gros boutons piègent, petite case fonctionne */
         overlay.querySelector('#dialog-cancel').addEventListener('click', function () {
             AntiUX.showPopup('Inscription annulée. (Bouton Annuler)');
         });

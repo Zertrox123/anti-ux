@@ -1,5 +1,3 @@
-/* Textes Wikipedia inutiles */
-
 window.WikiWall = {
     excerpts: [
         'Le bitcoin (de l\'anglais bit : « unité d\'information binaire » et coin « pièce de monnaie ») est une cryptomonnaie autrement appelée monnaie cryptographique. Dans le cas du bitcoin, celui-ci est décentralisé ou mutualisé : aucune organisation ni aucun individu ne peut contrôler le réseau Bitcoin, contrairement aux monnaies fiduciaires.',

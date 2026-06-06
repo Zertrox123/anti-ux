@@ -1,5 +1,3 @@
-/* Comportements anti-UX partagés */
-
 (function () {
     'use strict';
 
@@ -32,24 +30,17 @@
     ];
 
     const POPUP_STYLES = [
-        'pop-flash-green',
-        'pop-flash-yellow',
-        'pop-flash-red',
-        'pop-flash-blue',
-        'pop-flash-pink',
-        'pop-flash-orange',
+        'pop-default',
+        'pop-accent',
+        'pop-muted',
     ];
-    const POPUP_SPAWN_MS = 2800;
-    const POPUP_LIFETIME_MS = 17000;
-    const POPUP_TITLES = [
-        'Notification',
-        'Information',
-        'Alerte système',
-        'CryptoDash',
-    ];
+    const POPUP_SPAWN_MIN_MS = 900;
+    const POPUP_SPAWN_MAX_MS = 8200;
     const POPUP_IMAGE_CHANCE = 0.38;
+    const POPUP_IMAGE_URL = '/static/img/pitech-portrait.png';
+    const POPUP_IMAGE_SEED = 'pitech';
     const POPUP_SCALE_MIN = 1;
-    const POPUP_SCALE_MAX = 1.95;
+    const POPUP_SCALE_MAX = 1.08;
 
     const SUBWAY_SURFERS_VIDEOS = [
         { id: 'zZ7AimPACzc', aspectW: 16, aspectH: 9 },
@@ -60,15 +51,15 @@
     const SUBWAY_SURFERS_IDS = SUBWAY_SURFERS_VIDEOS.map(function (v) { return v.id; });
 
     let scatterCount = 0;
-    const MAX_SCATTER = 2;
-    const MAX_CACHED_POPUPS = 2;
+    const MAX_SCATTER = 8;
+    const MAX_CACHED_POPUPS = 8;
 
     let brainrotSpawnTimer = null;
     let brainrotVisible = false;
     let popupPositions = [];
     let lastUserActivity = Date.now();
     let videoCloseInterval = null;
-    let popupSpawnInterval = null;
+    let popupSpawnTimer = null;
     let activityThrottle = 0;
     let saveCacheTimer = null;
     let popupSpawnBusy = false;
@@ -78,10 +69,10 @@
     const VIDEO_ACTIVE_CLOSE_MS = 10000;
     const VIDEO_IDLE_RESET_MS = 5000;
     const LOADER_DURATION_MS = 5000;
+    const LOADER_COUNT_KEY = 'cryptodash_load_count';
     const ACTIVITY_THROTTLE_MS = 400;
     const POPUP_CACHE_KEY = 'cryptodash_popups';
-    const POPUP_UI_VERSION = 'scatter-v4';
-    const LOADER_DONE_KEY = 'cryptodash_loader_done';
+    const POPUP_UI_VERSION = 'scatter-v8';
     const BRAINROT_CACHE_KEY = 'cryptodash_brainrot';
     const THEME_DARK_TEXT_KEY = 'cryptodash_dark_text';
 
@@ -92,6 +83,8 @@
 
     function migrateSessionCache() {
         try {
+            sessionStorage.removeItem('cryptodash_loader_done');
+            sessionStorage.removeItem('cryptodash_seen_loader');
             if (sessionStorage.getItem('cryptodash_popup_ui') !== POPUP_UI_VERSION) {
                 sessionStorage.removeItem(POPUP_CACHE_KEY);
                 sessionStorage.removeItem('cryptodash_popups_seeded');
@@ -102,8 +95,8 @@
                 sessionStorage.removeItem(POPUP_CACHE_KEY);
             }
             const vidRaw = sessionStorage.getItem(BRAINROT_CACHE_KEY);
-            if (!vidRaw) { /* noop */ }
-            else if (vidRaw.indexOf('videoUrl') !== -1) {
+            if (!vidRaw) {
+            } else if (vidRaw.indexOf('videoUrl') !== -1) {
                 sessionStorage.removeItem(BRAINROT_CACHE_KEY);
             } else {
                 try {
@@ -115,15 +108,13 @@
                     sessionStorage.removeItem(BRAINROT_CACHE_KEY);
                 }
             }
-        } catch (e) { /* noop */ }
+        } catch (e) {}
     }
 
     function popupToCacheEntry(el) {
-        const style = POPUP_STYLES.find(function (s) { return el.classList.contains(s); }) || 'pop-flash-green';
-        const titleEl = el.querySelector('.scatter-popup-title');
+        const style = POPUP_STYLES.find(function (s) { return el.classList.contains(s); }) || 'pop-default';
         const base = {
             style: style,
-            barTitle: titleEl ? titleEl.textContent : '',
             tilt: el.style.getPropertyValue('--tilt') || '0deg',
             top: el.style.top,
             left: el.style.left,
@@ -157,15 +148,6 @@
         }
     }
 
-    function isLoaderDone() {
-        return !!(sessionStorage.getItem(LOADER_DONE_KEY) || sessionStorage.getItem('cryptodash_seen_loader'));
-    }
-
-    function setLoaderDone() {
-        sessionStorage.setItem(LOADER_DONE_KEY, '1');
-        sessionStorage.removeItem('cryptodash_seen_loader');
-    }
-
     function trapBackButton() {
         history.pushState(null, '', location.href);
         window.addEventListener('popstate', function () {
@@ -178,35 +160,39 @@
         w = w || 400;
         h = h || 200;
         const tickerH = document.getElementById('wiki-ticker')?.offsetHeight || 72;
-        const pad = 12;
-        const cols = 3;
-        const rows = 3;
-        const cellW = (window.innerWidth - pad * 2) / cols;
-        const cellH = (window.innerHeight - tickerH - pad * 2) / rows;
+        const pad = 8 + Math.floor(Math.random() * 24);
+        const maxLeft = Math.max(window.innerWidth - w - pad, pad);
+        const minTop = tickerH + pad;
+        const maxTop = Math.max(window.innerHeight - h - pad, minTop);
 
-        for (let attempt = 0; attempt < 30; attempt++) {
-            const col = Math.floor(Math.random() * cols);
-            const row = Math.floor(Math.random() * rows);
-            const jitterX = Math.random() * Math.max(cellW - w - 8, 0);
-            const jitterY = Math.random() * Math.max(cellH - h - 8, 0);
-            const left = pad + col * cellW + jitterX;
-            const top = tickerH + pad + row * cellH + jitterY;
-            const key = Math.floor(left / 40) + '-' + Math.floor(top / 40);
-            if (!popupPositions.includes(key)) {
+        for (let attempt = 0; attempt < 12; attempt++) {
+            const left = pad + Math.random() * (maxLeft - pad);
+            const top = minTop + Math.random() * (maxTop - minTop);
+            const key = Math.floor(left / 55) + '-' + Math.floor(top / 55);
+            if (!popupPositions.includes(key) || Math.random() < 0.35) {
                 popupPositions.push(key);
-                if (popupPositions.length > 40) popupPositions.shift();
+                if (popupPositions.length > 50) popupPositions.shift();
                 return { top: top, left: left };
             }
         }
 
         return {
-            top: tickerH + pad + Math.random() * (window.innerHeight - tickerH - h - pad * 2),
-            left: pad + Math.random() * (window.innerWidth - w - pad * 2),
+            top: minTop + Math.random() * (maxTop - minTop),
+            left: pad + Math.random() * (maxLeft - pad),
         };
     }
 
+    function randomSpawnDelay() {
+        return POPUP_SPAWN_MIN_MS +
+            Math.floor(Math.random() * (POPUP_SPAWN_MAX_MS - POPUP_SPAWN_MIN_MS + 1));
+    }
+
     function randomBurstCount() {
-        return 1 + Math.floor(Math.random() * 2);
+        const r = Math.random();
+        if (r < 0.22) return 0;
+        if (r < 0.58) return 1;
+        if (r < 0.88) return 2;
+        return 3;
     }
 
     function randomPopupScale() {
@@ -214,16 +200,12 @@
         return Math.round(scale * 100) / 100;
     }
 
-    function imageUrlFromSeed(seed, scale) {
-        const s = scale || POPUP_SCALE_MIN;
-        const w = Math.round(360 * s);
-        const h = Math.round(220 * s);
-        return 'https://picsum.photos/seed/cd' + seed + '/' + w + '/' + h;
+    function popupImageUrl() {
+        return POPUP_IMAGE_URL;
     }
 
     function randomImagePayload() {
-        const seed = Math.floor(Math.random() * 99999);
-        return { imageSeed: String(seed), imageUrl: imageUrlFromSeed(seed) };
+        return { imageSeed: POPUP_IMAGE_SEED, imageUrl: POPUP_IMAGE_URL };
     }
 
     function randomPopupPayload() {
@@ -237,9 +219,8 @@
 
     function buildPopupBodyHtml(data) {
         if (data.imageSeed || data.imageUrl) {
-            const seed = data.imageSeed || '';
-            const src = data.imageUrl || imageUrlFromSeed(seed);
-            return '<img class="scatter-popup-img" src="' + src + '" alt="Image" loading="lazy" decoding="async">';
+            const src = data.imageUrl || popupImageUrl();
+            return '<img class="scatter-popup-img" src="' + src + '" alt="PITECH" loading="lazy" decoding="async">';
         }
         return '<p class="scatter-popup-text">' + (data.message || '…') + '</p>';
     }
@@ -249,62 +230,80 @@
         saveCacheTimer = setTimeout(flushPopupsToCache, 120);
     }
 
+    function placeScatterPopup(el, data) {
+        if (data.top && data.left) {
+            el.style.top = data.top;
+            el.style.left = data.left;
+            return;
+        }
+        const w = el.offsetWidth || 320;
+        const h = el.offsetHeight || 160;
+        const pos = randomPos(w, h);
+        el.style.top = pos.top + 'px';
+        el.style.left = pos.left + 'px';
+    }
+
+    function fitImagePopup(el, img) {
+        if (!img || !img.naturalWidth || !img.naturalHeight) return;
+        el.style.setProperty('--img-aspect', String(img.naturalWidth / img.naturalHeight));
+    }
+
     function mountScatterPopup(data) {
         scatterCount = Math.max(scatterCount, (parseInt(data.zIndex, 10) || 8000) - 8000);
         const popScale = data.popScale || randomPopupScale();
+        const hasImage = !!(data.imageSeed || data.imageUrl);
         const el = document.createElement('div');
-        el.className = 'popup-scatter ' + data.style;
+        el.className = 'popup-scatter ' + data.style + (hasImage ? ' popup-scatter-image' : '');
         el.style.setProperty('--tilt', data.tilt);
         el.style.setProperty('--pop-scale', String(popScale));
         if (data.imageSeed) {
             el.dataset.imageSeed = String(data.imageSeed);
         }
         if (data.imageSeed && !data.imageUrl) {
-            data.imageUrl = imageUrlFromSeed(data.imageSeed, popScale);
+            data.imageUrl = popupImageUrl();
         }
-        const barTitle = data.barTitle || POPUP_TITLES[Math.floor(Math.random() * POPUP_TITLES.length)];
         el.innerHTML =
             '<div class="scatter-popup-card">' +
-            '<div class="scatter-popup-head">' +
-            '<span class="scatter-popup-title">' + barTitle + '</span>' +
             '<button type="button" class="scatter-popup-close" aria-label="Fermer">✕</button>' +
-            '</div>' +
             '<div class="scatter-popup-body">' + buildPopupBodyHtml(data) + '</div>' +
             '</div>';
 
         document.body.appendChild(el);
-
-        if (data.top && data.left) {
-            el.style.top = data.top;
-            el.style.left = data.left;
-        } else {
-            const w = el.offsetWidth || 320;
-            const h = el.offsetHeight || 160;
-            const pos = randomPos(w, h);
-            el.style.top = pos.top + 'px';
-            el.style.left = pos.left + 'px';
-        }
         el.style.zIndex = data.zIndex || String(8000 + (++scatterCount));
 
-        setTimeout(function () {
-            if (el.parentNode) {
-                el.remove();
-                flushPopupsToCache();
+        const img = el.querySelector('.scatter-popup-img');
+        if (img) {
+            const onImgReady = function () {
+                fitImagePopup(el, img);
+                if (!data.top || !data.left) {
+                    placeScatterPopup(el, data);
+                }
+            };
+            if (img.complete && img.naturalWidth) {
+                onImgReady();
+            } else {
+                img.addEventListener('load', onImgReady, { once: true });
+                if (!data.top && !data.left) {
+                    placeScatterPopup(el, data);
+                }
             }
-        }, POPUP_LIFETIME_MS);
+        } else {
+            placeScatterPopup(el, data);
+        }
+
+        attachPopupDismiss(el);
 
         return el;
     }
 
-    function handlePopupClick(ev) {
-        const closeBtn = ev.target.closest('.scatter-popup-close');
-        if (!closeBtn) return;
-        const popup = closeBtn.closest('.popup-scatter');
-        if (!popup) return;
-        ev.preventDefault();
-        ev.stopPropagation();
-        popup.remove();
-        flushPopupsToCache();
+    function attachPopupDismiss(el) {
+        el.addEventListener('click', function (ev) {
+            if (!ev.target.closest('.scatter-popup-card')) return;
+            ev.preventDefault();
+            ev.stopPropagation();
+            el.remove();
+            flushPopupsToCache();
+        });
     }
 
     function restorePopupsFromCache() {
@@ -316,7 +315,7 @@
             JSON.parse(raw).forEach(function (data) {
                 if (data.message || data.imageSeed) {
                     if (data.imageSeed && !data.imageUrl) {
-                        data.imageUrl = imageUrlFromSeed(data.imageSeed, data.popScale);
+                        data.imageUrl = popupImageUrl();
                     }
                     mountScatterPopup(data);
                 }
@@ -329,10 +328,7 @@
     function showScatterPopup(payload) {
         if (document.getElementById('infinite-loader')) return;
 
-        const existing = document.querySelectorAll('.popup-scatter');
-        while (existing.length >= MAX_SCATTER && existing[0]) {
-            existing[0].remove();
-        }
+        if (document.querySelectorAll('.popup-scatter').length >= MAX_SCATTER) return;
 
         const data = typeof payload === 'string'
             ? { message: payload }
@@ -340,10 +336,10 @@
 
         scatterCount++;
         const style = data.style || POPUP_STYLES[Math.floor(Math.random() * POPUP_STYLES.length)];
-        const tilt = data.tilt || ((Math.random() * 14 - 7).toFixed(1) + 'deg');
+        const tilt = data.tilt || ((Math.random() * 4 - 2).toFixed(1) + 'deg');
         const popScale = data.popScale || randomPopupScale();
 
-        const el = mountScatterPopup({
+        mountScatterPopup({
             message: data.message,
             imageUrl: data.imageUrl,
             imageSeed: data.imageSeed,
@@ -354,14 +350,6 @@
             left: data.left || '',
             zIndex: data.zIndex || String(8000 + scatterCount),
         });
-
-        if (!data.top || !data.left) {
-            const w = el.offsetWidth || 320;
-            const h = el.offsetHeight || 160;
-            const pos = randomPos(w, h);
-            el.style.top = pos.top + 'px';
-            el.style.left = pos.left + 'px';
-        }
 
         flushPopupsToCache();
     }
@@ -399,29 +387,35 @@
 
         popupSpawnBusy = true;
         for (let i = 0; i < n; i++) {
-            showScatterPopup(randomPopupPayload());
+            (function (idx) {
+                setTimeout(function () {
+                    showScatterPopup(randomPopupPayload());
+                    if (idx === n - 1) popupSpawnBusy = false;
+                }, Math.floor(Math.random() * 1600) * idx);
+            })(i);
         }
-        popupSpawnBusy = false;
+    }
+
+    function scheduleNextPopupSpawn() {
+        clearTimeout(popupSpawnTimer);
+        popupSpawnTimer = setTimeout(function () {
+            if (Math.random() < 0.16) {
+                scheduleNextPopupSpawn();
+                return;
+            }
+            spawnScatterBurst();
+            scheduleNextPopupSpawn();
+        }, randomSpawnDelay());
     }
 
     function startRandomPopups() {
-        document.addEventListener('click', handlePopupClick, true);
-
         restorePopupsFromCache();
-
-        const alreadySeeded = sessionStorage.getItem('cryptodash_popups_seeded');
-        if (!alreadySeeded && document.querySelectorAll('.popup-scatter').length === 0) {
-            setTimeout(function () { spawnScatterBurst(randomBurstCount()); }, 600);
-            sessionStorage.setItem('cryptodash_popups_seeded', '1');
-        }
-
-        if (popupSpawnInterval) clearInterval(popupSpawnInterval);
-        popupSpawnInterval = setInterval(function () {
-            spawnScatterBurst(randomBurstCount());
-        }, POPUP_SPAWN_MS);
+        setTimeout(function () {
+            spawnScatterBurst();
+        }, 250 + Math.floor(Math.random() * 6000));
+        scheduleNextPopupSpawn();
     }
 
-    /* Modale plein écran → bulle scatter (ne bloque plus le site) */
     function showPopup(message) {
         showScatterPopup(message);
     }
@@ -458,6 +452,12 @@
         const text = window.WikiWall.excerpts.concat(window.WikiWall.excerpts).join('  ★  ');
         ticker.innerHTML = '<div class="wiki-ticker-inner">' + text + '</div>';
         document.body.prepend(ticker);
+        requestAnimationFrame(function () {
+            document.documentElement.style.setProperty(
+                '--wiki-ticker-height',
+                ticker.offsetHeight + 'px'
+            );
+        });
     }
 
     function finishLoader(overlay, onComplete) {
@@ -466,24 +466,43 @@
         if (overlay._progressTimer) clearInterval(overlay._progressTimer);
         if (overlay._fallbackTimer) clearTimeout(overlay._fallbackTimer);
         if (overlay._stopPong) {
-            try { overlay._stopPong(); } catch (e) { /* noop */ }
+            try { overlay._stopPong(); } catch (e) {}
         }
         overlay.remove();
-        setLoaderDone();
-        if (onComplete) {
-            try { onComplete(); } catch (e) { console.error(e); }
-        }
+        const callbacks = (overlay._callbacks || []).slice();
+        if (onComplete) callbacks.push(onComplete);
+        callbacks.forEach(function (cb) {
+            try { cb(); } catch (e) { console.error(e); }
+        });
+    }
+
+    function getLoaderCount() {
+        let count = 0;
+        try {
+            count = parseInt(sessionStorage.getItem(LOADER_COUNT_KEY) || '0', 10);
+        } catch (e) {}
+        return isNaN(count) ? 0 : count;
+    }
+
+    function bumpLoaderCount() {
+        const next = getLoaderCount() + 1;
+        try {
+            sessionStorage.setItem(LOADER_COUNT_KEY, String(next));
+        } catch (e) {}
+        return next;
     }
 
     function startInfiniteLoader(_title, onComplete) {
-        if (isLoaderDone()) {
-            if (onComplete) onComplete();
-            return null;
+        const existing = document.getElementById('infinite-loader');
+        if (existing) {
+            if (onComplete) {
+                if (!existing._callbacks) existing._callbacks = [];
+                existing._callbacks.push(onComplete);
+            }
+            return existing;
         }
 
-        if (document.getElementById('infinite-loader')) {
-            return document.getElementById('infinite-loader');
-        }
+        const loadCount = bumpLoaderCount();
 
         const overlay = document.createElement('div');
         overlay.className = 'loader-overlay';
@@ -495,11 +514,12 @@
             '<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>' +
             '</div></div>';
 
+        overlay._callbacks = onComplete ? [onComplete] : [];
         document.body.appendChild(overlay);
 
         const canvas = overlay.querySelector('#loader-pong');
         if (window.LoaderPong && canvas) {
-            overlay._stopPong = LoaderPong.start(canvas, overlay);
+            overlay._stopPong = LoaderPong.start(canvas, overlay, { loadCount: loadCount });
         }
 
         const fill = overlay.querySelector('#progress-fill');
@@ -526,31 +546,24 @@
     }
 
     function runRegressiveProgress(onComplete) {
-        if (isLoaderDone()) {
-            if (onComplete) onComplete();
+        const existing = document.getElementById('infinite-loader');
+        if (existing) {
+            if (onComplete) {
+                if (!existing._callbacks) existing._callbacks = [];
+                existing._callbacks.push(onComplete);
+            }
             return;
         }
-        startInfiniteLoader(null, onComplete);
+        if (onComplete) onComplete();
     }
 
     function runQuickLoad(onComplete) {
-        if (isLoaderDone()) {
-            if (onComplete) onComplete();
-            return;
-        }
-        startInfiniteLoader(null, onComplete);
+        runRegressiveProgress(onComplete);
     }
 
     function slowNavigate(url) {
-        function go() {
-            flushPopupsToCache();
-            window.location.href = url;
-        }
-        if (isLoaderDone()) {
-            go();
-            return;
-        }
-        startInfiniteLoader(null, go);
+        flushPopupsToCache();
+        window.location.href = url;
     }
 
     function subwaySurfersVideoMeta(videoId) {
@@ -561,7 +574,7 @@
         var origin = '';
         try {
             origin = '&origin=' + encodeURIComponent(window.location.origin);
-        } catch (e) { /* noop */ }
+        } catch (e) {}
         return 'https://www.youtube-nocookie.com/embed/' + id +
             '?autoplay=1&mute=1&playsinline=1&controls=1&rel=0&modestbranding=1' +
             '&loop=1&playlist=' + id + origin;
@@ -581,14 +594,14 @@
         document.body.classList.toggle('theme-dark-text', !!enabled);
         try {
             localStorage.setItem(THEME_DARK_TEXT_KEY, enabled ? '1' : '0');
-        } catch (e) { /* noop */ }
+        } catch (e) {}
     }
 
     function initDarkTextTheme() {
         var enabled = false;
         try {
             enabled = localStorage.getItem(THEME_DARK_TEXT_KEY) === '1';
-        } catch (e) { /* noop */ }
+        } catch (e) {}
         applyDarkTextTheme(enabled);
 
         var toggle = document.getElementById('theme-dark-text');
@@ -717,6 +730,36 @@
         });
     }
 
+    function startMisplacedChrome() {
+        const searchBar = document.querySelector('header .search-bar');
+        const settingsLink = document.querySelector('aside nav a[href*="settings"]');
+        const settingsItem = settingsLink ? settingsLink.closest('li') : null;
+
+        if (!searchBar || !settingsLink) return;
+
+        const bottomBar = document.createElement('div');
+        bottomBar.className = 'misplaced-bottom-bar';
+
+        const settingsBar = document.createElement('div');
+        settingsBar.className = 'search-bar misplaced-settings-bar';
+        settingsBar.innerHTML =
+            '<i data-lucide="settings"></i>' +
+            '<a href="' + settingsLink.getAttribute('href') + '" class="search-bar-pill-link">' +
+            (settingsLink.textContent.trim() || 'Paramètres') +
+            '</a>';
+
+        bottomBar.appendChild(searchBar);
+        bottomBar.appendChild(settingsBar);
+        document.body.appendChild(bottomBar);
+        document.body.classList.add('has-misplaced-bottom-bar');
+
+        if (settingsItem) settingsItem.remove();
+
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+            lucide.createIcons();
+        }
+    }
+
     window.AntiUX = {
         trapBackButton: trapBackButton,
         startRandomPopups: startRandomPopups,
@@ -730,6 +773,7 @@
         startWikiTicker: startWikiTicker,
         startBrainrotMode: startBrainrotMode,
         startMicroAnnoyances: startMicroAnnoyances,
+        startMisplacedChrome: startMisplacedChrome,
         cleanupOrphans: cleanupOrphans,
         applyDarkTextTheme: applyDarkTextTheme,
     };
@@ -744,13 +788,16 @@
     document.addEventListener('DOMContentLoaded', function () {
         migrateSessionCache();
         cleanupOrphans();
-        initDarkTextTheme();
-        bindNavigationPersistence();
-        trapBackButton();
-        startWikiTicker();
-        startRandomPopups();
-        startBrainrotMode();
-        startMicroAnnoyances();
-        showCookieBanner();
+        startInfiniteLoader(null, function () {
+            initDarkTextTheme();
+            bindNavigationPersistence();
+            trapBackButton();
+            startWikiTicker();
+            startRandomPopups();
+            startBrainrotMode();
+            startMicroAnnoyances();
+            showCookieBanner();
+            startMisplacedChrome();
+        });
     });
 })();

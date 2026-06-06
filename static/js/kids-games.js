@@ -1,5 +1,3 @@
-/* Mini-jeux débiles pour le panneau latéral */
-
 window.KidsGames = {
     list: ['catch', 'whack', 'color'],
 
