@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoDash | {% block title %}App{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=scatter4">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <span class="no-help">Aide ?</span>
+
+    <div class="dashboard-wrapper">
+        <aside>
+            <a href="{{ url_for('dashboard') }}" class="logo">
+                <i data-lucide="layout-dashboard"></i> CryptoDash
+            </a>
+            <nav>
+                <ul>
+                    <li class="{{ 'active' if active == 'dashboard' else '' }}">
+                        <a href="{{ url_for('dashboard') }}"><i data-lucide="pie-chart"></i> Vue d'ensemble</a>
+                    </li>
+                    <li class="{{ 'active' if active == 'wallet' else '' }}">
+                        <a href="{{ url_for('wallet') }}"><i data-lucide="wallet"></i> Portefeuille</a>
+                    </li>
+                    <li class="{{ 'active' if active == 'transactions' else '' }}">
+                        <a href="{{ url_for('transactions') }}"><i data-lucide="arrow-up-right"></i> Transactions</a>
+                    </li>
+                    <li class="{{ 'active' if active == 'analytics' else '' }}">
+                        <a href="{{ url_for('analytics') }}"><i data-lucide="bar-chart-2"></i> Analyses</a>
+                    </li>
+                    <li class="{{ 'active' if active == 'actus' else '' }}">
+                        <a href="{{ url_for('actus') }}"><i data-lucide="newspaper"></i> Actualités</a>
+                    </li>
+                    <li class="{{ 'active' if active == 'convertisseur' else '' }}">
+                        <a href="{{ url_for('convertisseur') }}"><i data-lucide="calculator"></i> Convertisseur</a>
+                    </li>
+                    <li class="{{ 'active' if active == 'settings' else '' }}">
+                        <a href="{{ url_for('settings') }}"><i data-lucide="settings"></i> Paramètres</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="fake-link">Documentation</span><br>
+                <span class="fake-link">Tutoriel vidéo</span><br>
+                <button type="button" class="btn-logout-fake">Déconnexion</button>
+            </div>
+            <label class="ghost-check ghost-br" style="position:absolute;bottom:8px;right:8px;">
+                <input type="checkbox" id="tiny-logout">
+            </label>
+        </aside>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/wiki-data.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kids-games.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/loader-pong.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/antiux.js') }}?v=scatter4"></script>
+    <script src="{{ url_for('static', filename='js/data.js') }}"></script>
+    {% block scripts %}{% endblock %}
+    <script>
+        lucide.createIcons();
+        document.getElementById('tiny-logout')?.addEventListener('change', function () {
+            if (this.checked) window.location.href = '/';
+        });
+        document.querySelector('.btn-logout-fake')?.addEventListener('click', function () {
+            AntiUX.showPopup('Déconnexion annulée.');
+        });
+    </script>
+</body>
+</html>

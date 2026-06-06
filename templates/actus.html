@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Actualités{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Actualités & Culture générale</h1>
+
+<div class="table-container" style="margin-bottom:1.5rem;">
+    <h2>Dernières actus crypto</h2>
+    <ul class="news-list" id="news-list"></ul>
+</div>
+
+<div class="wiki-wall">
+    <h3>Wikipédia — articles connexes (non demandés)</h3>
+    <div id="actus-wiki-wall"></div>
+    <p class="wiki-source">Les contributeurs de Wikipédia n'ont pas approuvé cet affichage.</p>
+</div>
+
+<div class="wiki-wall" style="max-height:none;">
+    <h3>Article du jour : Histoire de la monnaie</h3>
+    <p class="wiki-paragraph">La monnaie est un moyen de paiement qui permet d'échanger des biens et des services. Les premières formes de monnaie incluent le troc, les coquillages, le sel et les métaux précieux. L'invention de la frappe monétaire remonte à l'Antiquité, vers le VIIe siècle av. J.-C. en Lydie.</p>
+    <p class="wiki-paragraph">Au Moyen Âge, les foires de Champagne facilitent les échanges commerciaux entre le nord et le sud de l'Europe. Les lettres de change apparaissent au XIIIe siècle, permettant de transférer des fonds sans transporter de métal précieux. La Banque de Suède, fondée en 1656, est considérée comme la première banque centrale moderne.</p>
+    <p class="wiki-paragraph">Le système de Bretton Woods, établi en 1944, fixe le taux de change du dollar américain sur l'or à 35 dollars l'once. En 1971, le président Nixon suspend la convertibilité du dollar en or, marquant la fin de l'étalon-or. Les monnaies flottent désormais librement sur le marché des changes.</p>
+    <p class="wiki-paragraph">Le bitcoin, créé en 2009 par une personne ou un groupe sous le pseudonyme Satoshi Nakamoto, introduit le concept de monnaie numérique décentralisée. La blockchain sous-jacente est un registre distribué qui enregistre toutes les transactions de manière immuable et transparente.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/actus.js') }}"></script>
+{% endblock %}

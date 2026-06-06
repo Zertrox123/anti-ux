@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Convertisseur{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Convertisseur de crypto-monnaies</h1>
+
+<div class="settings-section">
+    <h2>Conversion instantanée*</h2>
+    <div class="converter-grid">
+        <div class="form-group">
+            <label>Montant</label>
+            <input type="number" id="conv-amount" value="1" min="0" step="any">
+        </div>
+        <div class="converter-arrow">→</div>
+        <div class="form-group">
+            <label>De</label>
+            <select id="conv-from">
+                <option value="BTC">BTC — Bitcoin</option>
+                <option value="ETH">ETH — Ethereum</option>
+                <option value="SOL">SOL — Solana</option>
+                <option value="USD">USD — Dollar</option>
+                <option value="EUR">EUR — Euro</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group" style="margin-top:1rem;">
+        <label>Vers</label>
+        <select id="conv-to">
+            <option value="USD">USD — Dollar</option>
+            <option value="EUR">EUR — Euro</option>
+            <option value="BTC">BTC — Bitcoin</option>
+            <option value="ETH">ETH — Ethereum</option>
+        </select>
+    </div>
+    <div class="button-row" style="margin-top:1rem;">
+        <button type="button" class="btn-cancel" id="conv-fake-btn">Convertir maintenant</button>
+        <button type="button" class="btn-validate" disabled>Annuler</button>
+    </div>
+    <div class="converter-result" id="conv-result">Cliquez sur Convertir</div>
+    <label class="ghost-check ghost-br"><input type="checkbox" id="conv-ghost"></label>
+    <p class="text-hostile" style="margin-top:0.5rem;">* Résultat garanti incorrect sauf exception.</p>
+</div>
+
+<div class="wiki-wall">
+    <h3>Wikipédia — Taux de change</h3>
+    <p class="wiki-paragraph">Le taux de change est le prix d'une monnaie exprimé en une autre monnaie. Sur le marché des changes, les devises sont cotées les unes par rapport aux autres. Le taux de change peut être fixe ou flottant selon la politique monétaire du pays émetteur.</p>
+    <p class="wiki-paragraph">La parité de pouvoir d'achat (PPA) est un taux de change théorique entre deux devises qui égalise le pouvoir d'achat des deux monnaies. Le « Big Mac Index », publié par The Economist, utilise le prix du burger Big Mac comme indicateur informel de PPA.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/convertisseur.js') }}"></script>
+{% endblock %}

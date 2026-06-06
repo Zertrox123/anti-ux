@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Analyses{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Analyses & graphiques</h1>
+
+<div class="filter-bar">
+    <button type="button" class="filter-btn active" data-fake-range="1j">1J</button>
+    <button type="button" class="filter-btn" data-fake-range="7j">7J</button>
+    <button type="button" class="filter-btn" data-fake-range="1m">1M</button>
+    <button type="button" class="filter-btn" data-fake-range="1a">1A</button>
+    <label class="ghost-check" style="position:relative;opacity:0.04;"><input type="checkbox" id="tiny-range-7j"></label>
+    <label class="ghost-check" style="position:relative;opacity:0.04;"><input type="checkbox" id="tiny-range-30j"></label>
+</div>
+
+<div class="charts-grid charts-grid-3">
+    <div class="chart-card chart-card-wide">
+        <h3>Évolution du portefeuille</h3>
+        <div class="chart-wrap chart-wrap-tall"><canvas id="chart-analytics-line"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <h3>Volume par actif (%)</h3>
+        <div class="chart-wrap chart-wrap-tall"><canvas id="chart-analytics-bar"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <h3>Allocation</h3>
+        <div class="chart-wrap chart-wrap-tall"><canvas id="chart-analytics-pie"></canvas></div>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Meilleur actif</h3>
+        <div class="value" style="font-size:1.1rem;">SOL +5.8%</div>
+    </div>
+    <div class="stat-card">
+        <h3>Pire actif</h3>
+        <div class="value" style="font-size:1.1rem;">DOT -3.1%</div>
+    </div>
+    <div class="stat-card">
+        <h3>Indice peur/avidité</h3>
+        <div class="value-redacted">██</div>
+        <div class="trend" style="color:var(--text-muted);">Neutre</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

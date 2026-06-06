@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Portefeuille{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Portefeuille</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Valeur totale</h3>
+        <div class="value" id="wallet-total">—</div>
+        <div class="trend up">+8.3% ce mois</div>
+    </div>
+    <div class="stat-card">
+        <h3>Actifs détenus</h3>
+        <div class="value" id="wallet-count">—</div>
+    </div>
+    <div class="stat-card">
+        <h3>Dernière opération</h3>
+        <div class="value" style="font-size:1rem;">Achat BTC</div>
+        <div class="trend" style="color:var(--text-muted);">Il y a 1 jour</div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="chart-card chart-card-wide">
+        <h3>Répartition des actifs</h3>
+        <div class="chart-wrap chart-wrap-tall"><canvas id="chart-allocation"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <h3>Actions</h3>
+        <div class="action-panel">
+            <button type="button" class="btn-cancel btn-action-fake">Déposer des fonds</button>
+            <button type="button" class="btn-validate btn-action-fake" disabled>Retirer</button>
+            <label class="ghost-check ghost-bl"><input type="checkbox" id="tiny-deposit"></label>
+            <p id="deposit-msg" class="action-feedback hidden"></p>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <h2>Mes actifs</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Actif</th>
+                <th>Quantité</th>
+                <th>Valeur</th>
+                <th>Part</th>
+            </tr>
+        </thead>
+        <tbody id="holdings-body"></tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/wallet.js') }}"></script>
+{% endblock %}

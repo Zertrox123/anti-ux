@@ -1,115 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CryptoDash</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>CryptoDash | Connexion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=scatter4">
 </head>
 <body>
 
-    <div id="auth-container" class="auth-container">
-        <!-- LOGIN CARD -->
-        <div id="login-card" class="auth-card">
-            <h2>Welcome Back</h2>
+    <span class="no-help">Aide ?</span>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>CryptoDash</h2>
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuth('login')">Connexion</div>
+                <div class="auth-tab" onclick="switchAuth('register')">Inscription</div>
+            </div>
+
             <form id="login-form">
                 <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" required>
+                    <label>Adresse e-mail</label>
+                    <input type="email" placeholder="vous@exemple.fr" required>
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" required>
+                    <label>Mot de passe</label>
+                    <input type="password" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn-primary">Sign In</button>
+                <div class="button-row">
+                    <button type="button" class="btn-cancel" id="fake-cancel-login">Annuler tout</button>
+                    <button type="button" class="btn-validate" id="btn-validate-login">Valider</button>
+                </div>
+                <p class="text-hostile" style="margin-top: 0.75rem;">
+                    <span class="fake-link">Mot de passe oublié ?</span> ·
+                    <span class="fake-link">Besoin d'aide ?</span>
+                </p>
+                <label class="ghost-check ghost-br"><input type="checkbox" id="tiny-login-validate"></label>
             </form>
+
+            <form id="register-form" class="hidden">
+                <div class="form-group">
+                    <label>Nom complet</label>
+                    <input type="text" placeholder="Jean Dupont" required>
+                </div>
+                <div class="form-group">
+                    <label>Adresse e-mail</label>
+                    <input type="email" placeholder="vous@exemple.fr" required>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="reg-password" placeholder="••••••••" required>
+                    <div id="password-error" class="password-error"></div>
+                </div>
+
+                <div class="dob-picker">
+                    <label>Date de naissance</label>
+                    <div id="dob-display" class="dob-display"></div>
+                    <button type="button" id="dob-prev" class="dob-btn">◀ Jour précédent</button>
+                    <p class="text-hostile" style="margin-top: 0.5rem;">Reculez d'un jour à la fois. Aucun raccourci pour les années.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Préférences <span class="text-hostile">(toutes obligatoires*)</span></label>
+                    <div id="extra-options" class="options-overflow"></div>
+                </div>
+
+                <div class="captcha-container">
+                    <label>Vérification de sécurité — 20 étapes</label>
+                    <div id="captcha-steps"></div>
+                </div>
+
+                <div class="button-row">
+                    <button type="button" class="btn-cancel" id="fake-cancel-register">Annuler tout</button>
+                    <button type="button" class="btn-validate" id="btn-validate-register">Valider</button>
+                </div>
+                <p class="text-hostile" style="margin-top: 0.75rem;">
+                    En vous inscrivant vous acceptez nos
+                    <span class="fake-link">782 conditions générales</span>.
+                </p>
+                <label class="ghost-check ghost-bl"><input type="checkbox" id="tiny-register-validate"></label>
+            </form>
+
             <div class="auth-footer">
-                Don't have an account? <span onclick="toggleAuth()">Register</span>
+                <span class="fake-link">Centre d'aide</span>
+                <span class="fake-link">Contact support</span>
+                <span class="fake-link">FAQ</span>
             </div>
         </div>
 
-        <!-- REGISTER CARD (Hidden by default) -->
-        <div id="register-card" class="auth-card hidden">
-            <h2>Create Account</h2>
-            <form id="register-form">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" required>
-                </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" required>
-                </div>
-                <button type="submit" class="btn-primary">Create Account</button>
-            </form>
-            <div class="auth-footer">
-                Already have an account? <span onclick="toggleAuth()">Login</span>
-            </div>
+        <div class="wiki-wall auth-wiki-side">
+            <h3>ℹ️ Culture générale (Wikipédia)</h3>
+            <div id="auth-wiki-wall"></div>
+            <p class="wiki-source">Source : Wikipédia, l'encyclopédie libre. Contenu non vérifié ni utile.</p>
         </div>
     </div>
 
-    <!-- DASHBOARD (Hidden by default) -->
-    <div id="dashboard-container" class="dashboard-wrapper hidden">
-        <aside>
-            <div class="logo"><i data-lucide="layout-dashboard"></i> CryptoDash</div>
-            <nav>
-                <ul>
-                    <li class="active"><i data-lucide="pie-chart"></i> Overview</li>
-                    <li><i data-lucide="wallet"></i> Wallet</li>
-                    <li><i data-lucide="arrow-up-right"></i> Transactions</li>
-                    <li><i data-lucide="settings"></i> Settings</li>
-                </ul>
-            </nav>
-        </aside>
-
-        <main>
-            <header>
-                <div class="search-bar">
-                    <i data-lucide="search"></i>
-                    <input type="text" id="crypto-search" placeholder="Search coins..." onkeyup="filterTable()">
-                </div>
-                <div class="user-profile">
-                    <span>John Doe</span>
-                    <button onclick="logout()" class="btn-logout">Logout</button>
-                </div>
-            </header>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total Balance</h3>
-                    <div class="value">$42,500.00</div>
-                    <div class="trend up">+12.5% ↑</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Profit/Loss</h3>
-                    <div class="value">$5,230.00</div>
-                    <div class="trend up">+4.2% ↑</div>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <h2>Market Overview</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Asset</th>
-                            <th>Price</th>
-                            <th>24h Change</th>
-                            <th>Market Cap</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body"></tbody>
-                </table>
-            </div>
-        </main>
-    </div>
-
-    <script src="/static/script.js"></script>
+    <script src="{{ url_for('static', filename='js/wiki-data.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kids-games.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/loader-pong.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/antiux.js') }}?v=scatter4"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script>document.addEventListener('DOMContentLoaded', function () { WikiWall.renderWall('auth-wiki-wall', 4); });</script>
 </body>
 </html>

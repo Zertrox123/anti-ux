@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Paramètres{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Paramètres du compte</h1>
+
+<div class="settings-section">
+    <h2>Profil</h2>
+    <div class="form-group">
+        <label>Nom affiché</label>
+        <input type="text" value="Utilisateur">
+    </div>
+    <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" value="vous@exemple.fr">
+    </div>
+</div>
+
+<div class="settings-section">
+    <h2>Apparence</h2>
+    <label class="theme-toggle-label">
+        <input type="checkbox" id="theme-dark-text">
+        Thème sombre (textes blancs uniquement)
+    </label>
+    <p class="text-hostile" style="margin-top:0.5rem;">Les arrière-plans restent clairs. Lisibilité non garantie.</p>
+</div>
+
+<div class="settings-section">
+    <h2>Notifications</h2>
+    <div class="options-overflow" style="max-height: 160px;">
+        <label><input type="checkbox" checked> Alertes prix toutes les 30 secondes</label>
+        <label><input type="checkbox"> Résumé quotidien par fax</label>
+        <label><input type="checkbox" checked> Notifications push pendant le sommeil</label>
+        <label><input type="checkbox"> Rappels de connexion horaires</label>
+        <label><input type="checkbox" checked> Vibrations pour chaque centime gagné</label>
+        <label><input type="checkbox"> Digest hebdomadaire par pigeon voyageur</label>
+    </div>
+</div>
+
+<div class="settings-section">
+    <h2>Sécurité</h2>
+    <div class="form-group">
+        <label>Nouveau mot de passe</label>
+        <input type="password" placeholder="••••••••">
+    </div>
+</div>
+
+<div class="button-row" style="position:relative;">
+    <button type="button" id="btn-save-settings" class="btn-cancel">Annuler tout</button>
+    <button type="button" class="btn-validate" id="btn-validate-settings">Valider</button>
+    <label class="ghost-check ghost-br"><input type="checkbox" id="tiny-save-settings"></label>
+</div>
+
+<p class="text-hostile" style="margin-top: 2rem;">
+    <span class="fake-link">Retour au tableau de bord</span> ·
+    <span class="fake-link">Exporter mes données</span>
+</p>
+{% endblock %}
+
+{% block scripts %}
+<div class="delete-account-zone">
+    <button type="button" id="btn-delete-account" class="delete-account-btn">Supprimer le compte</button>
+</div>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

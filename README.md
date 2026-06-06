@@ -15,9 +15,21 @@ Les règles de mot de passe absurdes : Afficher les erreurs de mot de passe une 
 - L'inversion des couleurs standards : Le bouton "Valider" est rouge et barré, tandis que le bouton "Annuler tout" est vert vif, clignotant et placé exactement là où l'on s'attend à trouver le bouton de validation
 - "Supprimer le compte" mais bien loin bien bresom
 - Captcha microscopique, ou simple mais avec 20 étapes
-- La barre de chargement régressive : Une barre de progression qui avance jusqu'à 99%, s'arrête pendant 3 minutes, puis redescend à 42% sans aucune explication (il faut 104%)
+- La barre de chargement régressive : Chargement infini — monte à 99%, bloque, redescend, recommence, sans jamais finir
+
+## Pages
+
+| Route | Contenu |
+|---|---|
+| `/` | Connexion / Inscription |
+| `/dashboard` | Vue d'ensemble, graphiques BTC & portefeuille, marché |
+| `/wallet` | Portefeuille, allocation (donut), actifs détenus |
+| `/transactions` | Historique des opérations |
+| `/analytics` | Graphiques détaillés (ligne, barres, camembert) |
+| `/settings` | Paramètres du compte |
 
 Lancer le site :
 ```
 python3 main.py
 ```
+L'URL s'affiche dans le terminal (port libre entre 5001 et 5010).

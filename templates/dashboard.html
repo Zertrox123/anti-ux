@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<header>
+    <div class="search-bar">
+        <i data-lucide="search"></i>
+        <input type="text" id="crypto-search" placeholder="Rechercher (BTC, ETH...)" onkeyup="filterTable()">
+    </div>
+    <div class="user-profile"><span>Utilisateur</span></div>
+</header>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Solde total</h3>
+        <div class="value-redacted">████████</div>
+        <div class="trend up">+12.5% ↑</div>
+    </div>
+    <div class="stat-card">
+        <h3>Profit / Perte</h3>
+        <div class="value">$5,230.00</div>
+        <div class="trend up">+4.2% ↑</div>
+    </div>
+    <div class="stat-card">
+        <h3>Trades actifs</h3>
+        <div class="value">12</div>
+        <div class="trend" style="color: var(--text-muted);">Stable</div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="chart-card">
+        <h3>Prix Bitcoin (7j)</h3>
+        <div class="chart-wrap"><canvas id="chart-btc"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <h3>Portefeuille (30j)</h3>
+        <div class="chart-wrap"><canvas id="chart-portfolio"></canvas></div>
+    </div>
+</div>
+
+<div class="table-container">
+    <h2>Aperçu du marché</h2>
+    <table id="crypto-table">
+        <thead>
+            <tr>
+                <th>Actif</th>
+                <th>Prix</th>
+                <th>Variation 24h</th>
+                <th>Capitalisation</th>
+            </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+    <p class="search-hint text-hostile">Astuce : tapez le nom d'une crypto pour la masquer de la liste.</p>
+</div>
+
+<div class="wiki-wall">
+    <h3>📚 Encyclopédie CryptoDash — extrait Wikipédia</h3>
+    <div id="dash-wiki-wall"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
