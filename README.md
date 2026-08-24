@@ -1,14 +1,13 @@
 # Anti-UX
 
-Interactive experimental UI challenge application in Python.
+Application interactive explorant les schémas d'interface utilisateur adverses et trompeurs.
 
-## Overview
+## Présentation
 
-Explores adversarial UI/UX patterns, state machines, and human-computer interaction heuristics.
+Expérimentation ludique en Python analysant les mécanismes d'attention utilisateur, les pièges ergonomiques et les machines à états d'interaction homme-machine.
 
-## Getting Started
+## Lancement
 
 ```bash
-# Run application
 python3 main.py
 ```
