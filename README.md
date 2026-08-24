@@ -1,10 +1,8 @@
 # Anti-UX
 
-Application interactive explorant les schémas d'interface utilisateur adverses et trompeurs.
+Un jeu / challenge en Python basé sur des interfaces volontairement trompeuses et frustrantes.
 
-## Présentation
-
-Expérimentation ludique en Python analysant les mécanismes d'attention utilisateur, les pièges ergonomiques et les machines à états d'interaction homme-machine.
+Teste les réflexes et s'amuse avec les pires patterns d'UI possibles.
 
 ## Lancement
 
